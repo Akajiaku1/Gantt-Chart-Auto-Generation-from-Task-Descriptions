@@ -1,0 +1,42 @@
+import pandas as pd
+import plotly.express as px
+import re
+from datetime import datetime, timedelta
+
+# Step 1: Synthetic Task Descriptions
+task_descriptions = [
+    "Task: Data Collection, Start: 2025-04-01, Duration: 5 days, Assigned to: Alice",
+    "Task: Data Cleaning, Start: 2025-04-06, Duration: 3 days, Assigned to: Bob",
+    "Task: Feature Engineering, Start: 2025-04-09, Duration: 4 days, Assigned to: Alice",
+    "Task: Model Training, Start: 2025-04-13, Duration: 7 days, Assigned to: Carol",
+    "Task: Evaluation & Testing, Start: 2025-04-20, Duration: 3 days, Assigned to: Bob",
+    "Task: Report Generation, Start: 2025-04-23, Duration: 2 days, Assigned to: Alice"
+]
+
+# Step 2: Parse Descriptions into Structured Data
+def parse_description(desc):
+    task_match = re.search(r"Task:\s*(.*?),", desc)
+    start_match = re.search(r"Start:\s*([\d\-]+),", desc)
+    duration_match = re.search(r"Duration:\s*(\d+)\s*days", desc)
+    person_match = re.search(r"Assigned to:\s*(\w+)", desc)
+
+    task = task_match.group(1).strip()
+    start = datetime.strptime(start_match.group(1), "%Y-%m-%d")
+    duration = int(duration_match.group(1))
+    end = start + timedelta(days=duration)
+    person = person_match.group(1)
+
+    return {
+        "Task": task,
+        "Start": start,
+        "Finish": end,
+        "Assigned To": person
+    }
+
+task_data = [parse_description(desc) for desc in task_descriptions]
+df_tasks = pd.DataFrame(task_data)
+
+# Step 3: Generate Gantt Chart
+fig = px.timeline(df_tasks, x_start="Start", x_end="Finish", y="Task", color="Assigned To", title="Gantt Chart - Auto Generated from Descriptions")
+fig.update_yaxes(categoryorder="total ascending")
+fig.show()
