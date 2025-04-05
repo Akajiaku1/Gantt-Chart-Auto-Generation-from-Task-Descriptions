@@ -1,0 +1,15 @@
+import pandas as pd
+import plotly.express as px
+from datetime import timedelta
+
+# Read Excel file (example structure: Task, Start, Duration (days), Assigned To)
+df_excel = pd.read_excel("tasks.xlsx")
+
+# Convert Start to datetime and compute Finish
+df_excel["Start"] = pd.to_datetime(df_excel["Start"])
+df_excel["Finish"] = df_excel["Start"] + df_excel["Duration (days)"].apply(lambda x: timedelta(days=int(x)))
+
+# Gantt Chart
+fig = px.timeline(df_excel, x_start="Start", x_end="Finish", y="Task", color="Assigned To", title="Gantt Chart - From Excel")
+fig.update_yaxes(categoryorder="total ascending")
+fig.show()
